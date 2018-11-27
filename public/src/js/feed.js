@@ -9,7 +9,10 @@ closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 unRegisterSwButton.addEventListener('click', unregisterSW);
 
 function openCreatePostModal() {
-  createPostArea.style.display = 'block';
+
+  //UP AND DOWN animation, SCROLL UP 
+  createPostArea.style.transform = 'translateY(0)';
+
   if (deferredPrompt) {
     deferredPrompt.prompt();
 
@@ -27,7 +30,8 @@ function openCreatePostModal() {
 }
 
 function closeCreatePostModal() {
-  createPostArea.style.display = 'none';
+  //UP AND DOWN animation, SCROLL DOWN
+  createPostArea.style.transform = 'translateY(100vh)';
 }
 
 // function for ondemand caching
@@ -48,7 +52,9 @@ function createCard(data) {
   cardTitle.className = 'mdl-card__title';
   cardTitle.style.backgroundImage = 'url("'+data.image+'")';
   cardTitle.style.backgroundSize = 'cover';
-  cardTitle.style.height = '180px';
+  //cardTitle.style.height = '180px';
+  cardTitle.classList.add('my-created-css-class');
+
   cardWrapper.appendChild(cardTitle);
   var cardTitleTextElement = document.createElement('h2');
   cardTitleTextElement.style.color='blue';
