@@ -94,7 +94,8 @@ function deleteDataItem(st, id){
 }
 
 /******************  Background Sync funtions */
-const firebaseDbUrl = 'https://pwagram-5109b.firebaseio.com/post.json';
+const firebaseDBURL = 'https://pwagram-5109b.firebaseio.com/posts.json';
+const firebaseFunctionUrl = 'https://us-central1-pwagram-5109b.cloudfunctions.net/storePostData';
 const imageUrl =  'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7'; 'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7';
 
 function syncData(url, postData){

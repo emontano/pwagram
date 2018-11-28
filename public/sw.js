@@ -60,7 +60,7 @@ self.addEventListener('activate',function(event){
 //CACHE THEN NETWORK part2 (Fetch from network and write to indexdb (dinamic content), that's it):  
 //should only work for the url -> 'https://pwagram-5109b.firebaseio.com/post'
 self.addEventListener('fetch',function(event){
-    const url ='https://pwagram-5109b.firebaseio.com/post';    
+    const url ='https://pwagram-5109b.firebaseio.com/posts';    
 
     //if request url matches the feeds request
     if (event.request.url.indexOf(url) > -1)
@@ -149,12 +149,15 @@ self.addEventListener ('sync', event => {
                 //loop through all the pending posts stored in indexedDB
                 for ( var dt of data){
                     // send item stored to backed server
-                    syncData ( firebaseDbUrl, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
+                    syncData ( firebaseFunctionUrl, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
                     .then (resp => {
                         console.log( 'Sent data => ', resp);
                         if ( resp.ok ){
-                            // if sent successfully then delete the item from indexedDB
-                            deleteDataItem( 'sync-posts', dt.id);
+                            resp.json()
+                            .then( respData => {
+                                // if sent successfully then delete the item from indexedDB
+                                deleteDataItem( 'sync-posts', respData.id);
+                            })
                         }
                     })
                     .catch( err => {

@@ -94,11 +94,11 @@ function updateUI(data){
 }
 
 // STRATEGY: CACHE THEN NETWORK - Part 1
-const url = 'https://pwagram-5109b.firebaseio.com/post.json'; // 'https://httpbin.org/get';
+// 'https://httpbin.org/get';
 var networkDataReceived = false;
 
 //fetch the url, which will return a promise with json response
-fetch(url)
+fetch(firebaseDBURL)
   .then(rest => {
     return rest.json();
   })
@@ -125,7 +125,7 @@ if ('indexedDB' in window)
      */
   function sendData(){
     console.log('Using Fallback method to sync data');
-    syncData ( firebaseDbUrl, buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, imageUrl))
+    syncData ( firebaseFunctionUrl, buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, imageUrl))
     .then ( res => {
       console.log ('Sent data: ' , res);
       updateUI();
