@@ -60,7 +60,7 @@ self.addEventListener('activate',function(event){
 //CACHE THEN NETWORK part2 (Fetch from network and write to indexdb (dinamic content), that's it):  
 //should only work for the url -> 'https://pwagram-5109b.firebaseio.com/post'
 self.addEventListener('fetch',function(event){
-    const url ='https://pwagram-5109b.firebaseio.com/post';    
+    const url ='https://pwagram-5109b.firebaseio.com/posts';    
 
     //if request url matches the feeds request
     if (event.request.url.indexOf(url) > -1)
@@ -135,6 +135,42 @@ self.addEventListener('fetch',function(event){
     }
     
 });
+
+/* BACKGROUND SYNCRONICATION */
+
+self.addEventListener ('sync', event => {
+    console.log('[SW] => Background Syncing', event);
+    if( event.tag === 'sync-new-posts'){
+        console.log( '[SW] => Syncing new Posts' );
+        event.waitUntil(
+            //read all the data in indexedDB regarding pending posts, waiting to be syncronized
+            readAllData( 'sync-posts')
+            .then ( data => {
+                //loop through all the pending posts stored in indexedDB
+                for ( var dt of data){
+                    // send item stored to backed server
+                    syncData ( firebaseFunctionUrl, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
+                    .then (resp => {
+                        console.log( 'Sent data => ', resp);
+                        if ( resp.ok ){
+                            resp.json()
+                            .then( respData => {
+                                // if sent successfully then delete the item from indexedDB
+                                deleteDataItem( 'sync-posts', respData.id);
+                            })
+                        }
+                    })
+                    .catch( err => {
+                        console.log ( 'Error while sending stored data', err);
+                    })
+                }
+            })
+        )
+    }
+})
+
+
+
 
 
 //STRATEGY: Cache with Network Fallback (With dynamic caching) - STARTING OPTION
