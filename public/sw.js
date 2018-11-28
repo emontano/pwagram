@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/helper.js');
 
 const DYNAMIC_CACHE_MAX_SIZE = 16;
-const CACHE_STATIC_NAME = 'static-v17';
+const CACHE_STATIC_NAME = 'static-v18';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
 const APP_SHELL_FILES=[
     '/',
@@ -73,10 +73,11 @@ self.addEventListener('fetch',function(event){
 
                 //clear indexedDb data before writing new data
                 clearAllData('posts').then ( () => {
+                    //if clear transaction was successfull we extract data from the response, to continue
                     return cloneRes.json();
                    })
                   .then ( data => {
-                    //Store response data in indexdb (Dynamic content) 
+                    //Store response data in indexedDB (Dynamic content) 
                     for (var key in data){
                         writeData('posts', data[key]);
                     }
