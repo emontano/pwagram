@@ -136,6 +136,39 @@ self.addEventListener('fetch',function(event){
     
 });
 
+/* BACKGROUND SYNCRONICATION */
+
+self.addEventListener ('sync', event => {
+    console.log('[SW] => Background Syncing', event);
+    if( event.tag === 'sync-new-posts'){
+        console.log( '[SW] => Syncing new Posts' );
+        event.waitUntil(
+            //read all the data in indexedDB regarding pending posts, waiting to be syncronized
+            readAllData( 'sync-posts')
+            .then ( data => {
+                //loop through all the pending posts stored in indexedDB
+                for ( var dt of data){
+                    // send item stored to backed server
+                    syncData ( firebaseDbUrl, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
+                    .then (resp => {
+                        console.log( 'Sent data => ', resp);
+                        if ( resp.ok ){
+                            // if sent successfully then delete the item from indexedDB
+                            deleteDataItem( 'sync-posts', dt.id);
+                        }
+                    })
+                    .catch( err => {
+                        console.log ( 'Error while sending stored data', err);
+                    })
+                }
+            })
+        )
+    }
+})
+
+
+
+
 
 //STRATEGY: Cache with Network Fallback (With dynamic caching) - STARTING OPTION
 /* self.addEventListener('fetch',function(event){

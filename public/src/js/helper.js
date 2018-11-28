@@ -40,6 +40,11 @@ function trimCache(cacheName, maxUrls){
 
 //indexdb creation
 var dbPromise = idb.open('posts-store', 1, db => {
+    //ObjectStore for temporal background sync jobs posts
+    if(!db.objectStoreNames.contains('sync-posts')){
+        db.createObjectStore('sync-posts', {keyPath: 'id'});
+    }
+    //ObjectStore for cache posts
     if(!db.objectStoreNames.contains('posts')){
         db.createObjectStore('posts', {keyPath: 'id'});
     }
@@ -78,7 +83,7 @@ function clearAllData(st){
 //delete single item from indexedDB
 function deleteDataItem(st, id){
     dbPromise.then( db => {
-        var tx = transaction(st, 'readwrite');
+        var tx = db.transaction(st, 'readwrite');
         var store = tx.objectStore(st);
         store.delete(id);
         return tx.complete;
@@ -86,4 +91,32 @@ function deleteDataItem(st, id){
     }).then( () => {
         console.log ( 'Item deleted! : ' + id);
     })
+}
+
+/******************  Background Sync funtions */
+const firebaseDbUrl = 'https://pwagram-5109b.firebaseio.com/post.json';
+const imageUrl =  'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7'; 'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7';
+
+function syncData(url, postData){
+    return fetch(url, buildPostBody( postData ) ) ;
+}
+
+function buildPostBody(postData){
+   return {
+        method:'POST',
+        headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+        },
+        body : JSON.stringify ( postData )
+    }
+} 
+
+function buildJsonPost(_id,_title, _loc, _image){
+    return {
+        id: _id,
+        title: _title,
+        location:_loc,
+        image: _image
+    }
 }
