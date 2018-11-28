@@ -82,14 +82,6 @@ function updateUI(data){
   }
 }
 
-function jsonToArray(data){
-  var dataArray = [];
-  for (var key in data){
-    dataArray.push(data[key])
-  }
-  return dataArray;
-}
-
 // STRATEGY: CACHE THEN NETWORK - Part 1
 const url = 'https://pwagram-5109b.firebaseio.com/post.json'; // 'https://httpbin.org/get';
 var networkDataReceived = false;
@@ -107,19 +99,11 @@ fetch(url)
   });
 
 //verify the the Browser supports cache
-if ('caches' in window)
+if ('indexedDB' in window)
   {
-    //look for the request in the cache, and return a promise with json response
-    caches.match(url)
-    .then(respon => {
-      if (respon ){
-        return respon.json();
-      }
-    })
-    //handdle the promise with the response(data) if it has not been recived from the network yet
-    .then(data => {
-      console.log('From Cache: ', data);
-      if ( !networkDataReceived){
+    readAllData('posts').then ( data => {
+    if ( !networkDataReceived){
+        console.log('From Cache: ', data);
         updateUI(jsonToArray(data));;
         }
     });
