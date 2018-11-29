@@ -1,4 +1,5 @@
 var deferredPrompt;
+const enableNotificationButtons = document.querySelectorAll( ' .enable-notifications');
 
 
 //Use pollyfills for older browsers(Use of Promises and fetch)
@@ -32,3 +33,51 @@ function unregisterSW(){
        }) 
     }
 }
+
+/* FUNCTIONS FOR NOTIFICATION REQUEST */
+
+if ( 'Notification' in window){
+    for ( var button of enableNotificationButtons){
+        button.style.display = 'inline-block';
+        button.addEventListener( 'click', askForNotificationPermission);
+    }
+}
+
+function askForNotificationPermission(){
+    Notification.requestPermission( result => {
+        console.log('User choice', result);
+        if (result !== 'granted' ) {
+            console.log ( 'No notification permission granted');
+        }
+        else{
+            //hide notifications buttons
+            displaySwNotification();
+        }
+    });
+}
+
+function displaySwNotification(){
+    if ( 'serviceWorker' in navigator){
+        const options = { 
+            body: 'You have successfully subscrided to our Notification service!',
+            icon: '/src/images/icons/app-icon-96x96.png',
+            image: '/src/images/sf-boat.jpg',
+            dir: 'ltr',
+            lang: 'en-US', //BCP 47
+            vibrate: [100,50,200],
+            badge: 'src/images/icons/app-icon-96x96.png',
+            tag: 'pwaGram-SW--notification',
+            renotify: true,
+            actions: [
+                { action: 'Confirm', title: 'Ok', icon: '/src/images/icons/app-icon-96x96.png' },
+                { action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png'}
+            ]
+        };
+
+        navigator.serviceWorker.ready
+        .then( swreg => {
+            swreg.showNotification( 'PwaGram SW Subscription', options );
+        });
+    }
+}
+

@@ -169,8 +169,24 @@ self.addEventListener ('sync', event => {
     }
 })
 
+/* FUNCTIONS FOR NOTIFICATION REQUEST */
+self.addEventListener ( 'notificationclick', event => {
+    var notification = event.notification;
+    var action = event.action;
 
+    console.log( notification);
+    if ( action === 'confirm' ){
+        console.log( 'Confirm was chosen');
+    }
+    else{
+        console.log( action );
+    }
+    notification.close();
+})
 
+self.addEventListener ( 'nofificationclose' , event => {
+    console.log( 'Notification was closed', event);
+})
 
 
 //STRATEGY: Cache with Network Fallback (With dynamic caching) - STARTING OPTION
