@@ -98,7 +98,7 @@ function updateUI(data){
 var networkDataReceived = false;
 
 //fetch the url, which will return a promise with json response
-fetch(firebaseDBURL)
+fetch(POSTS_DB_URL)
   .then(rest => {
     return rest.json();
   })
@@ -112,7 +112,7 @@ fetch(firebaseDBURL)
 //verify the the Browser supports cache
 if ('indexedDB' in window)
   {
-    readAllData('posts').then ( data => {
+    readAllData(POSTS_OBJ_STORE).then ( data => {
     if ( !networkDataReceived){
         console.log('From Cache: ', data);
         updateUI(jsonToArray(data));;
@@ -125,7 +125,7 @@ if ('indexedDB' in window)
      */
   function sendData(){
     console.log('Using Fallback method to sync data');
-    syncData ( firebaseFunctionUrl, buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, imageUrl))
+    syncData ( FB_POSTS_API_URL, buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, IMAGE_URL))
     .then ( res => {
       console.log ('Sent data: ' , res);
       updateUI();
@@ -147,14 +147,14 @@ form.addEventListener('submit', event => {
   if ( 'serviceWorker' in navigator && 'SyncManager' in window){
     navigator.serviceWorker.ready
       .then( sw => {
-          var post = buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, imageUrl);
+          var post = buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, IMAGE_URL);
         
           //write the data to indexedDB ( data intermidiary) and if successfull register the backgroud job
-          writeData ('sync-posts', post)
+          writeData (SYNC_POSTS_OBJ_STORE, post)
           .then ( () => {
-              console.log( 'Post written to sync-posts');
+              console.log( 'Post written to ' , SYNC_POSTS_OBJ_STORE);
               //register a sync withing the SW
-              return sw.sync.register('sync-new-posts');
+              return sw.sync.register(SW_SYNC_REGIST);
           })
           .then( () => {
               console.log('Background job register in SW');

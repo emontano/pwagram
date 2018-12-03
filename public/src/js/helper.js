@@ -1,3 +1,16 @@
+const FB_DB_URL = 'https://pwagram-5109b.firebaseio.com/';
+const POSTS_DB_URL = FB_DB_URL + 'posts.json';
+const SUBSCRIPTIONS_DB_URL = FB_DB_URL + 'subscriptions.json';
+const FB_POSTS_API_URL = 'https://us-central1-pwagram-5109b.cloudfunctions.net/storePostData';
+const IMAGE_URL =  'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7'; 'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7';
+const VAPID_PUB_KEY = 'BPQe7fQRzOBjNB18MWRJ6k3iDZtYYbJvorbA4hi9jva8fYtZeHJgdG3A_GHShf5j_4xS9Xnd1q2cmV8Kh-SWGiw';
+
+const INDEXDB_STORE = 'posts-store';
+const POSTS_OBJ_STORE = 'posts';
+const SYNC_POSTS_OBJ_STORE = 'sync-posts';
+const SW_SYNC_REGIST =  'sync-new-posts';
+
+
 //convert a json response into an data array
 function jsonToArray(data){
     var dataArray = [];
@@ -39,14 +52,14 @@ function trimCache(cacheName, maxUrls){
 
 
 //indexdb creation
-var dbPromise = idb.open('posts-store', 1, db => {
+var dbPromise = idb.open(INDEXDB_STORE, 1, db => {
     //ObjectStore for temporal background sync jobs posts
-    if(!db.objectStoreNames.contains('sync-posts')){
-        db.createObjectStore('sync-posts', {keyPath: 'id'});
+    if(!db.objectStoreNames.contains(SYNC_POSTS_OBJ_STORE)){
+        db.createObjectStore(SYNC_POSTS_OBJ_STORE, {keyPath: 'id'});
     }
     //ObjectStore for cache posts
-    if(!db.objectStoreNames.contains('posts')){
-        db.createObjectStore('posts', {keyPath: 'id'});
+    if(!db.objectStoreNames.contains(POSTS_OBJ_STORE)){
+        db.createObjectStore(POSTS_OBJ_STORE, {keyPath: 'id'});
     }
 })
 
@@ -94,10 +107,6 @@ function deleteDataItem(st, id){
 }
 
 /******************  Background Sync funtions */
-const firebaseDBURL = 'https://pwagram-5109b.firebaseio.com/posts.json';
-const firebaseFunctionUrl = 'https://us-central1-pwagram-5109b.cloudfunctions.net/storePostData';
-const imageUrl =  'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7'; 'https://firebasestorage.googleapis.com/v0/b/pwagram-5109b.appspot.com/o/sf-boat.jpg?alt=media&token=e2230fe5-9bc1-479e-a5c9-f34ca5c13ae7';
-
 function syncData(url, postData){
     return fetch(url, buildPostBody( postData ) ) ;
 }
@@ -120,4 +129,18 @@ function buildJsonPost(_id,_title, _loc, _image){
         location:_loc,
         image: _image
     }
+}
+
+/* convert base64 string to Array*/
+function urlBase64ToUint8Array( base64String){
+    var padding = '='.repeat(( 4 - base64String.length % 4) % 4);
+    var base64 = (base64String + padding).replace( /\-/g, '+').replace( /_/g, '/');
+    
+    var rowData = window.atob(base64);
+    var outputArrary = new Uint8Array( rowData.length );
+
+    for ( var i = 0; i < rowData.length; i++){
+        outputArrary [i] = rowData.charCodeAt(i);
+    }
+    return outputArrary;
 }

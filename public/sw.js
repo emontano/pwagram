@@ -2,7 +2,7 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/helper.js');
 
 const DYNAMIC_CACHE_MAX_SIZE = 16;
-const CACHE_STATIC_NAME = 'static-v18';
+const CACHE_STATIC_NAME = 'static-v19';
 const CACHE_DYNAMIC_NAME = 'dynamic-v3';
 const APP_SHELL_FILES=[
     '/',
@@ -60,26 +60,25 @@ self.addEventListener('activate',function(event){
 //CACHE THEN NETWORK part2 (Fetch from network and write to indexdb (dinamic content), that's it):  
 //should only work for the url -> 'https://pwagram-5109b.firebaseio.com/post'
 self.addEventListener('fetch',function(event){
-    const url ='https://pwagram-5109b.firebaseio.com/posts';    
 
     //if request url matches the feeds request
-    if (event.request.url.indexOf(url) > -1)
+    if (event.request.url.indexOf(POSTS_DB_URL) > -1)
         {
         //fetch the request from network
         event.respondWith( fetch (event.request)
             .then( res => {
-                console.log('SW: NON-APPSHELL NETWORK ROUTING -> ' + url);
+                console.log('SW: NON-APPSHELL NETWORK ROUTING -> ' + POSTS_DB_URL);
                 const cloneRes = res.clone();
 
                 //clear indexedDb data before writing new data
-                clearAllData('posts').then ( () => {
+                clearAllData(POSTS_OBJ_STORE).then ( () => {
                     //if clear transaction was successfull we extract data from the response, to continue
                     return cloneRes.json();
                    })
                   .then ( data => {
                     //Store response data in indexedDB (Dynamic content) 
                     for (var key in data){
-                        writeData('posts', data[key]);
+                        writeData(POSTS_OBJ_STORE, data[key]);
                     }
                 });
             return res;
@@ -140,23 +139,23 @@ self.addEventListener('fetch',function(event){
 
 self.addEventListener ('sync', event => {
     console.log('[SW] => Background Syncing', event);
-    if( event.tag === 'sync-new-posts'){
+    if( event.tag === SW_SYNC_REGIST){
         console.log( '[SW] => Syncing new Posts' );
         event.waitUntil(
             //read all the data in indexedDB regarding pending posts, waiting to be syncronized
-            readAllData( 'sync-posts')
+            readAllData( SYNC_POSTS_OBJ_STORE )
             .then ( data => {
                 //loop through all the pending posts stored in indexedDB
                 for ( var dt of data){
                     // send item stored to backed server
-                    syncData ( firebaseFunctionUrl, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
+                    syncData ( FB_POSTS_API_URL, buildJsonPost(dt.id, dt.title, dt.location, dt.image))
                     .then (resp => {
                         console.log( 'Sent data => ', resp);
                         if ( resp.ok ){
                             resp.json()
                             .then( respData => {
                                 // if sent successfully then delete the item from indexedDB
-                                deleteDataItem( 'sync-posts', respData.id);
+                                deleteDataItem( SYNC_POSTS_OBJ_STORE, respData.id);
                             })
                         }
                     })
@@ -170,23 +169,77 @@ self.addEventListener ('sync', event => {
 })
 
 /* FUNCTIONS FOR NOTIFICATION REQUEST */
+// Listens for the user interaction with our notifications
 self.addEventListener ( 'notificationclick', event => {
     var notification = event.notification;
     var action = event.action;
 
+    //verify the type of action selected
     console.log( notification);
     if ( action === 'confirm' ){
         console.log( 'Confirm was chosen');
     }
     else{
-        console.log( action );
+        console.log( 'Opening new tab' , action );
+        gotoLink( event, notification.data.url);
     }
     notification.close();
-})
+});
 
+//user close the notification request but did not grant or deny permission
 self.addEventListener ( 'nofificationclose' , event => {
     console.log( 'Notification was closed', event);
-})
+});
+
+// listen for push notifications from the server, then send a notification to the system
+self.addEventListener( 'push', event => {
+    console.log( 'Push Notification received', event);
+
+    var data = { title: 'New!', content: 'Something new happened', openUrl: '/'};
+
+    if( event.data ){
+        data = JSON.parse( event.data.text() );
+    }
+
+    const options = {
+        body: data.content,
+        icon: '/src/images/icons/app-icon-96x96.png',
+        image: '/src/images/sf-boat.jpg',
+        badge: '/src/images/icons/app-icon-96x96.png', 
+        tag: 'pwaGram-notification',
+        actions: [
+            { action: 'confirm', title: 'Ok', icon: '/src/images/icons/app-icon-96x96.png' },
+            { action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png'}
+        ],
+        data : { url: data.openUrl}
+    };
+
+    event.waitUntil(
+        //send a notification to the system(upon receiving a push from server) via the serviceworker
+        self.registration.showNotification( data.title, options)
+    );
+});
+
+
+/* Function to open a browser page by the serviceworker */
+function gotoLink(event, url){
+    event.waitUntil(
+        clients.matchAll()
+        .then( clis => {
+            var client = clis.find( c => {
+                return c.visibilityState === 'visible';
+            });
+
+            if( client !== undefined ){
+                client.navigate ( url );
+                client.focus();
+            }
+            else{
+                clients.openWindow ( url );
+            }
+        })
+    )
+};
 
 
 //STRATEGY: Cache with Network Fallback (With dynamic caching) - STARTING OPTION

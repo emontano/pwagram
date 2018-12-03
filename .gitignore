@@ -81,8 +81,12 @@ typings/
 .dynamodb/ 
 
 #Firebase
+.firebase
+.firebase/*
+*.cache
 pwaGramKey.json
 functions/pwaGramKey.json
+functions/index.js
 
 .DS_Store
 

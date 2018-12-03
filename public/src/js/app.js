@@ -1,7 +1,6 @@
 var deferredPrompt;
 const enableNotificationButtons = document.querySelectorAll( ' .enable-notifications');
 
-
 //Use pollyfills for older browsers(Use of Promises and fetch)
 if(!Window.Promise){
     Window.Promise = Promise;
@@ -36,26 +35,77 @@ function unregisterSW(){
 
 /* FUNCTIONS FOR NOTIFICATION REQUEST */
 
-if ( 'Notification' in window){
+/* Function to add notification permission buttons and a listenter for clicks */
+if ( 'Notification' in window && 'serviceWorker' in navigator){
     for ( var button of enableNotificationButtons){
         button.style.display = 'inline-block';
         button.addEventListener( 'click', askForNotificationPermission);
     }
 }
 
+/* Function that shows the popup asking for permission to show notifications (part of the app) */
 function askForNotificationPermission(){
     Notification.requestPermission( result => {
         console.log('User choice', result);
+        //permision was rejected
         if (result !== 'granted' ) {
-            console.log ( 'No notification permission granted');
+            console.log ( 'Notification permission Not granted');
         }
         else{
+            //permission was granted
             //hide notifications buttons
-            displaySwNotification();
+            configurePushSub();
         }
     });
 }
 
+/* Funcion that creates a notification subscription and then 
+** sends the Notification subscription to server, along with the public key
+*/
+function configurePushSub(){
+    if( !('serviceWorker' in navigator)){
+        return;
+    }
+    
+    var registration;
+
+    navigator.serviceWorker.ready
+    .then( swreg => {
+        registration = swreg;
+        return swreg.pushManager.getSubscription();
+    })
+    .then ( sub => {
+        if ( sub !== null ){
+            //we have a subcription   
+        }
+        else{
+            //create a new subscription and returns as promise
+            return registration.pushManager.subscribe( {
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array( VAPID_PUB_KEY )
+            });
+        }
+    })
+    .then( newSub => { //we want to pass that subscription to our backend server
+        return fetch(SUBSCRIPTIONS_DB_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json'},
+            body: JSON.stringify ( newSub )
+        })
+    })
+    .then( res => {
+        if ( res.ok){
+            //display a notification to the system via the serviceworker
+            displaySwNotification();
+        }
+    })
+    .catch( err => {
+        console.log( 'Notification Subscription error:' ,error)
+    });
+}
+
+
+/* Function that allows a ServiceWorker to send notifications to the system */
 function displaySwNotification(){
     if ( 'serviceWorker' in navigator){
         const options = { 
@@ -76,8 +126,7 @@ function displaySwNotification(){
 
         navigator.serviceWorker.ready
         .then( swreg => {
-            swreg.showNotification( 'PwaGram SW Subscription', options );
+            swreg.showNotification( 'PwaGram Successfully Subscribed', options );
         });
     }
 }
-
