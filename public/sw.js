@@ -2,14 +2,15 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/helper.js');
 
 const DYNAMIC_CACHE_MAX_SIZE = 16;
-const CACHE_STATIC_NAME = 'static-v19';
-const CACHE_DYNAMIC_NAME = 'dynamic-v3';
+const CACHE_STATIC_NAME = 'static-v26';
+const CACHE_DYNAMIC_NAME = 'dynamic-v4';
 const APP_SHELL_FILES=[
     '/',
     '/index.html',
     '/favicon.ico',
     '/offline.html',
     '/src/js/helper.js',
+    '/src/js/media.js',
     '/src/js/app.js',
     '/src/js/feed.js',
     '/src/js/idb.js',

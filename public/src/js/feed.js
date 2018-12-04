@@ -4,6 +4,7 @@ var closeCreatePostModalButton = document.querySelector('#close-create-post-moda
 var sharedMomentsArea = document.querySelector('#shared-moments');
 //unregister SW button
 const unRegisterSwButton = document.querySelector('#unregister-sw-button');
+
 // variables for background sync elements
 const form = document.querySelector('form');
 const titleInput = document.querySelector('#title');
@@ -19,6 +20,9 @@ unRegisterSwButton.addEventListener('click', unregisterSW);
 function openCreatePostModal() {
   //UP AND DOWN animation, SCROLL UP 
   createPostArea.style.transform = 'translateY(0)';
+
+  //call function to inizialize native devices
+  initializeMedia();
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -40,6 +44,7 @@ function openCreatePostModal() {
 function closeCreatePostModal() {
   //UP AND DOWN animation, SCROLL DOWN(as define in css file)
   createPostArea.style.transform = 'translateY(100vh)';
+  closeMedia();
 }
 
 /*  function for ondemand caching */
