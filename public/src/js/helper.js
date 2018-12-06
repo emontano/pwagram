@@ -108,27 +108,16 @@ function deleteDataItem(st, id){
 
 /******************  Background Sync funtions */
 function syncData(url, postData){
-    return fetch(url, buildPostBody( postData ) ) ;
+    return fetch(url, { method:'POST', body : postData });
 }
 
-function buildPostBody(postData){
-   return {
-        method:'POST',
-        headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-        },
-        body : JSON.stringify ( postData )
-    }
-} 
-
-function buildJsonPost(_id,_title, _loc, _image){
-    return {
-        id: _id,
-        title: _title,
-        location:_loc,
-        image: _image
-    }
+function buildPostFormData(_id,_title, _loc, _image){
+    var postFormData = new FormData();
+    postFormData.append('id', _id);
+    postFormData.append('title', _title);
+    postFormData.append('location',_loc);
+    postFormData.append('file', _image, _id + '.png');
+    return postFormData;
 }
 
 /* convert base64 string to Array*/

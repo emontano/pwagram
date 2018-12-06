@@ -130,7 +130,7 @@ if ('indexedDB' in window)
      */
   function sendData(){
     console.log('Using Fallback method to sync data');
-    syncData ( FB_POSTS_API_URL, buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, IMAGE_URL))
+    syncData ( FB_POSTS_API_URL, buildPostFormData(new Date().toISOString(), titleInput.value, locationInput.value, picture))
     .then ( res => {
       console.log ('Sent data: ' , res);
       updateUI();
@@ -147,12 +147,12 @@ form.addEventListener('submit', event => {
   }
   //close the pop up
   closeCreatePostModal();
-
+  
   //verify if background syncronization is supported in the browser
   if ( 'serviceWorker' in navigator && 'SyncManager' in window){
     navigator.serviceWorker.ready
       .then( sw => {
-          var post = buildJsonPost(new Date().toISOString(), titleInput.value, locationInput.value, IMAGE_URL);
+          let post = {id: new Date().toISOString(), title: titleInput.value, location: locationInput.value, picture:picture };
         
           //write the data to indexedDB ( data intermidiary) and if successfull register the backgroud job
           writeData (SYNC_POSTS_OBJ_STORE, post)
