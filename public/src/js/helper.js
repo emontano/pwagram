@@ -111,11 +111,13 @@ function syncData(url, postData){
     return fetch(url, { method:'POST', body : postData });
 }
 
-function buildPostFormData(_id,_title, _loc, _image){
+function buildPostFormData(_id,_title, _loc, _rawLoc,_image){
     var postFormData = new FormData();
     postFormData.append('id', _id);
     postFormData.append('title', _title);
     postFormData.append('location',_loc);
+    postFormData.append('rawLocationLat',_rawLoc.lat);
+    postFormData.append('rawLocationLng',_rawLoc.lng);
     postFormData.append('file', _image, _id + '.png');
     return postFormData;
 }

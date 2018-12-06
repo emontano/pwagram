@@ -5,7 +5,44 @@ const captureButton = document.querySelector('#capture-btn');
 const imagePicker = document.querySelector('#image-picker');
 const imagePickerDiv = document.querySelector('#pick-image');
 var picture;
+const locationBtn = document.querySelector('#location-btn');
+const locationLoader = document.querySelector('#location-loader');
+var fetchedLocation  = {lat:0, lng:0};
+var sawAlert = false;
 
+/* Location feature listeners */
+locationBtn.addEventListener( 'click', event => {
+    locationBtn.style.display = 'none';
+    locationLoader.style.display = 'block';
+
+    navigator.geolocation.getCurrentPosition( gotCurrentPosition, errorGettingPosition, {enableHighAccuracy: true, timeout: 8000});
+
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+});
+
+function gotCurrentPosition(position){
+    fetchedLocation = { lat: position.coords.latitude, lng: position.coords.longitude};
+    locationInput.value = 'In Morelia';
+    document.querySelector('#manual-location').classList.add('is-focused');
+};
+
+function errorGettingPosition(error){
+    console.log( error );
+    if (!sawAlert){
+        alert ( 'Couldn\'t fetch location, please enter manually!' );
+        sawAlert = true;
+    }
+};
+
+function initializeLocation(){
+    if ( !( 'geolocation' in navigator)) {
+        locationBtn.style.display = 'none';
+    }
+};
+
+
+/*function to start camera streaming and capute */
 function initializeMedia(){
     console.log( 'INICIALIZING MEDIA CAPTURE');
     if ( !('mediaDevices' in navigator) ){
@@ -40,7 +77,7 @@ function initializeMedia(){
         console.log( 'Video capture Error: ', error);
         imagePickerDiv.style.display = 'block';
     })
-}
+};
 
 // functionality to capture a picture from the camera
 captureButton.addEventListener( 'click' , event => {
@@ -54,7 +91,7 @@ captureButton.addEventListener( 'click' , event => {
 
     //convert canvas capture to blob (file)
     picture = dataURItoBlob ( canvasElement.toDataURL() );
-})
+});
 
 //fallback for camera capture 
 imagePicker.addEventListener( 'change', event => {
@@ -66,8 +103,21 @@ function closeMedia(){
     imagePickerDiv.style.display = 'none';
     videoPlayer.style.display = 'none';
     canvasElement.style.display = 'none';
-    videoPlayer.srcObject.getVideoTracks().forEach( track => track.stop());
-}
+    captureButton.style.display+ 'inline';
+    locationBtn.style.display = 'inline';
+    locationLoader.style.display = 'none';
+    
+    //stop camera 
+    if ( videoPlayer.srcObject){
+        videoPlayer.srcObject.getVideoTracks().forEach( track => track.stop());
+    }
+
+    setTimeout(() => {
+        createPostArea.style.transform = 'translateY(100vh)';
+    }, 2);
+    
+    
+};
 
 //convert canvas image to blob (file)
 function dataURItoBlob( dataURI ){

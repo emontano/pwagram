@@ -13,16 +13,21 @@ const locationInput = document.querySelector('#location');
 shareImageButton.addEventListener('click', openCreatePostModal);
 closeCreatePostModalButton.addEventListener('click', closeCreatePostModal);
 //set event listener for unregister  SW  button
-unRegisterSwButton.addEventListener('click', unregisterSW);
+//unRegisterSwButton.addEventListener('click', unregisterSW);
 
 
 /*  Function to open the post creation pop*/
 function openCreatePostModal() {
   //UP AND DOWN animation, SCROLL UP 
-  createPostArea.style.transform = 'translateY(0)';
-
+  setTimeout(() => {
+    createPostArea.style.transform = 'translateY(0)';
+  }, 1);
+  
   //call function to inizialize native devices
   initializeMedia();
+
+  //call function to inizialize location natie device
+  initializeLocation();
 
   if (deferredPrompt) {
     deferredPrompt.prompt();
@@ -43,7 +48,6 @@ function openCreatePostModal() {
 /* Function to close the post creation pop*/
 function closeCreatePostModal() {
   //UP AND DOWN animation, SCROLL DOWN(as define in css file)
-  createPostArea.style.transform = 'translateY(100vh)';
   closeMedia();
 }
 
@@ -130,7 +134,7 @@ if ('indexedDB' in window)
      */
   function sendData(){
     console.log('Using Fallback method to sync data');
-    syncData ( FB_POSTS_API_URL, buildPostFormData(new Date().toISOString(), titleInput.value, locationInput.value, picture))
+    syncData ( FB_POSTS_API_URL, buildPostFormData(new Date().toISOString(), titleInput.value, locationInput.value, fetchedLocation, picture))
     .then ( res => {
       console.log ('Sent data: ' , res);
       updateUI();
@@ -152,7 +156,7 @@ form.addEventListener('submit', event => {
   if ( 'serviceWorker' in navigator && 'SyncManager' in window){
     navigator.serviceWorker.ready
       .then( sw => {
-          let post = {id: new Date().toISOString(), title: titleInput.value, location: locationInput.value, picture:picture };
+          let post = {id: new Date().toISOString(), title: titleInput.value, location: locationInput.value, rawLocation: fetchedLocation, picture:picture };
         
           //write the data to indexedDB ( data intermidiary) and if successfull register the backgroud job
           writeData (SYNC_POSTS_OBJ_STORE, post)

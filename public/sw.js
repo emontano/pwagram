@@ -2,8 +2,8 @@ importScripts('/src/js/idb.js');
 importScripts('/src/js/helper.js');
 
 const DYNAMIC_CACHE_MAX_SIZE = 16;
-const CACHE_STATIC_NAME = 'static-v31';
-const CACHE_DYNAMIC_NAME = 'dynamic-v4';
+const CACHE_STATIC_NAME = 'static-v4';
+const CACHE_DYNAMIC_NAME = 'dynamic-v5';
 const APP_SHELL_FILES=[
     '/',
     '/index.html',
@@ -150,7 +150,7 @@ self.addEventListener ('sync', event => {
                 //loop through all the pending posts stored in indexedDB
                 for ( var dt of data){
                     // send item stored to backed server
-                    syncData ( FB_POSTS_API_URL, buildPostFormData(dt.id, dt.title, dt.location, dt.picture))
+                    syncData ( FB_POSTS_API_URL, buildPostFormData(dt.id, dt.title, dt.location, dt.rawLocation, dt.picture))
                     .then (resp => {
                         console.log( 'Sent data => ', resp);
                         if ( resp.ok ){
