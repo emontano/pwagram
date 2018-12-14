@@ -57,7 +57,7 @@ function onSaveButtonClicked(event){
   if ('caches' in window){
     caches.open('user-requested').then( cache => {
       cache.add('https://httpbin.org/get');
-      cache.add('/src/images/sf-boat.jpg');
+      cache.add('/images/sf-boat.jpg');
     });
   }
 }
@@ -129,10 +129,10 @@ if ('indexedDB' in window)
     });
   }
 
-  /* Function to send data to back-end
-     Serves as Fallback in case browser does not support ServiceWorker or Background Sync
-     */
-  function sendData(){
+/* Function to send data to back-end
+    Serves as Fallback in case browser does not support ServiceWorker or Background Sync
+*/
+function sendData(){
     console.log('Using Fallback method to sync data');
     syncData ( FB_POSTS_API_URL, buildPostFormData(new Date().toISOString(), titleInput.value, locationInput.value, fetchedLocation, picture))
     .then ( res => {

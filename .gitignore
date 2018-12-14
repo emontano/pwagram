@@ -92,3 +92,5 @@ functions/
 functions/**
 .DS_Store
 
+#build directory
+build
