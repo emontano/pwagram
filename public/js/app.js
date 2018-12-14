@@ -1,5 +1,5 @@
 var deferredPrompt;
-const enableNotificationButtons = document.querySelectorAll( ' .enable-notifications');
+const enableNotificationButtons = document.querySelectorAll('.enable-notifications');
 
 //Use pollyfills for older browsers(Use of Promises and fetch)
 if(!Window.Promise){
@@ -8,9 +8,11 @@ if(!Window.Promise){
 
 //Register a Service Worker
 if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('/sw.js')
-    .then(() => console.log('Service Worker registered!' ))
-    .catch(err => console.log(err));
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log('Service Worker registered!' ))
+        .catch(err => console.log(err));
+    });  
 }
 
 // prevent chrome from showing the Install banner at default configurations
@@ -108,20 +110,23 @@ function configurePushSub(){
 /* Function that allows a ServiceWorker to send notifications to the system */
 function displaySwNotification(){
     if ( 'serviceWorker' in navigator){
+        //const  data = { title: 'New!', content: 'Something new happened', openUrl: '/'};
+
         const options = { 
             body: 'You have successfully subscrided to our Notification service!',
-            icon: '/src/images/icons/app-icon-96x96.png',
-            image: '/src/images/sf-boat.jpg',
+            icon: '/images/icons/app-icon-96x96.png',
+            image: '/images/sf-boat.jpg',
             dir: 'ltr',
             lang: 'en-US', //BCP 47
             vibrate: [100,50,200],
-            badge: 'src/images/icons/app-icon-96x96.png',
+            badge: '/images/icons/app-icon-96x96.png',
             tag: 'pwaGram-SW--notification',
             renotify: true,
             actions: [
-                { action: 'Confirm', title: 'Ok', icon: '/src/images/icons/app-icon-96x96.png' },
-                { action: 'cancel', title: 'Cancel', icon: '/src/images/icons/app-icon-96x96.png'}
+                { action: 'Confirm', title: 'Ok', icon: '/images/icons/app-icon-96x96.png' },
+                { action: 'Cancel', title: 'Cancel', icon: '/images/icons/app-icon-96x96.png'}
             ]
+            //data : { url: data.openUrl}
         };
 
         navigator.serviceWorker.ready

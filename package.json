@@ -4,7 +4,16 @@
   "description": "A complete guide to PWAs. Building a simple Instagram clone.",
   "main": "index.js",
   "scripts": {
-    "start": "http-server -c-1"
+    "start": "http-server -c-0",
+    "http": "node server.js",
+
+    "generatesw": "workbox injectManifest workbox-config.js",
+    "copyroot": "copyfiles -u 1 public/* build",
+    "copypublic": "copyfiles -e public/sw/*.* -u 1 public/**/**/* public/**/* public/* build",
+
+    "minify": "uglifyjs public/js/app.js -o build/js/app.min.js --compress --mangle && uglifyjs public/js/feed.js -o build/js/feed.min.js --compress --mangle && uglifyjs public/js/fetch.js -o build/js/fetch.min.js --compress --mangle && uglifyjs public/js/helper.js -o build/js/helper.min.js --compress --mangle && uglifyjs public/js/idb.js -o build/js/idb.min.js --compress --mangle && uglifyjs public/js/media.js -o build/js/media.min.js --compress --mangle && uglifyjs public/js/promise.js -o build/js/promise.min.js --compress --mangle ",
+
+    "build": "npm run generatesw && npm run copyroot && npm run copypublic"
   },
   "keywords": [
     "pwa",
@@ -17,6 +26,13 @@
   "author": "Maximilian Schwarzmüller",
   "license": "ISC",
   "devDependencies": {
-    "http-server": "^0.11.1"
+    "express": "^4.16.4",
+    "http-server": "^0.11.1",
+    "uglify-js": "^3.4.9"
+  },
+  "dependencies": {
+    "copyfiles": "^2.1.0",
+    "save": "^2.3.3",
+    "workbox-cli": "^3.6.3"
   }
 }
